@@ -23,8 +23,8 @@ WORKDIR /app
 # Copy only the built JAR from the previous stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose the Spring Boot port
+# Expose port (Render uses $PORT env variable, this is optional but OK)
 EXPOSE 8081
 
-# Run the JAR
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# ✅ Pass Render's dynamic PORT to Spring Boot
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8081}"]

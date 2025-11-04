@@ -1,12 +1,18 @@
 package com.example.backend.service;
 
-import com.example.backend.model.Product;
-import com.example.backend.repository.ProductRepository;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import com.example.backend.model.Product;
+import com.example.backend.repository.ProductRepository;
 
 @Service
 public class ProductService {
@@ -17,9 +23,21 @@ public class ProductService {
     private static final String FAKE_API = "https://fakestoreapi.com/products";
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // ✅ Fetch and save products from FakeStore API
+    // ✅ Fetch and save products from FakeStore API with headers
     public List<Product> fetchAndSaveProducts() {
-        Product[] products = restTemplate.getForObject(FAKE_API, Product[].class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("User-Agent", "Mozilla/5.0"); // ✅ bypass API block
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Product[]> response = restTemplate.exchange(
+                FAKE_API,
+                HttpMethod.GET,
+                entity,
+                Product[].class
+        );
+
+        Product[] products = response.getBody();
         if (products != null) {
             productRepository.deleteAll();
             productRepository.saveAll(Arrays.asList(products));
@@ -27,7 +45,7 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    // ✅ Get all products
+    // ✅ Get all products (fetch from API if DB empty)
     public List<Product> getAllProducts() {
         List<Product> existing = productRepository.findAll();
         if (existing.isEmpty()) {
