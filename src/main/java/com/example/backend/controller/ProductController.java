@@ -1,56 +1,67 @@
-package com.example.backend.service;
+package com.example.backend.controller;
 
-import com.example.backend.model.Product;
-import com.example.backend.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
-
-@Service
-public class ProductService {
-
-    @Autowired
-    private ProductRepository productRepository;
+@RestController
+@RequestMapping("/api/products")
+@CrossOrigin(origins = {
+    "https://ecom-my-shop-frontend.vercel.app/",
+    "http://localhost:5173"
+})
+public class ProductController {
 
     private static final String FAKE_API = "https://fakestoreapi.com/products";
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // ✅ Fetch and save products from FakeStore API with headers
-    public List<Product> fetchAndSaveProducts() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("User-Agent", "Mozilla/5.0"); // ✅ bypass API block
+    // ✅ Get all products
+    @GetMapping
+    public List<Map<String, Object>> getAllProducts() {
+        Map<String, Object>[] products = restTemplate.getForObject(FAKE_API, Map[].class);
+        List<Map<String, Object>> refinedList = new ArrayList<>();
+        Random random = new Random();
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<Product[]> response = restTemplate.exchange(
-                FAKE_API,
-                HttpMethod.GET,
-                entity,
-                Product[].class
-        );
-
-        Product[] products = response.getBody();
-        if (products != null) {
-            productRepository.deleteAll();
-            productRepository.saveAll(Arrays.asList(products));
+        for (Map<String, Object> p : products) {
+            Map<String, Object> product = new LinkedHashMap<>();
+            product.put("id", p.get("id"));
+            product.put("title", p.get("title"));
+            product.put("description", p.get("description"));
+            product.put("price", p.get("price"));
+            product.put("category", p.get("category"));
+            product.put("image", p.get("image"));
+            product.put("rating", p.get("rating")); // ✅ include rating object
+            product.put("stock", random.nextInt(50) + 1); // random stock 1–50
+            refinedList.add(product);
         }
-        return productRepository.findAll();
+
+        return refinedList;
     }
 
-    // ✅ Get all products (fetch from API if DB empty)
-    public List<Product> getAllProducts() {
-        List<Product> existing = productRepository.findAll();
-        if (existing.isEmpty()) {
-            return fetchAndSaveProducts();
-        }
-        return existing;
-    }
+    // ✅ Get single product by ID
+    @GetMapping("/{id}")
+    public Map<String, Object> getProductById(@PathVariable Long id) {
+        Map<String, Object> p = restTemplate.getForObject(FAKE_API + "/" + id, Map.class);
+        if (p == null) return null;
 
-    // ✅ Get product by ID
-    public Product getProductById(String id) {
-        return productRepository.findById(id).orElse(null);
+        Map<String, Object> product = new LinkedHashMap<>();
+        product.put("id", p.get("id"));
+        product.put("title", p.get("title"));
+        product.put("description", p.get("description"));
+        product.put("price", p.get("price"));
+        product.put("category", p.get("category"));
+        product.put("image", p.get("image"));
+        product.put("rating", p.get("rating")); // ✅ include nested rating
+        product.put("stock", new Random().nextInt(50) + 1);
+        return product;
     }
 }
