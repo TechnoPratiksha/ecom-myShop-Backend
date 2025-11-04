@@ -1,5 +1,7 @@
 package com.example.backend.model;
 
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartItem {
-    private String productId;   // should match frontend product.id
+
+    @Field("productId")   // ✅ Ensure Mongo uses productId field
+    private String productId;
+
     private String title;
     private String description;
     private double price;

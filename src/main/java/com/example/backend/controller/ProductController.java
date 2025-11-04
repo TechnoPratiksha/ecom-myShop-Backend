@@ -1,12 +1,24 @@
 package com.example.backend.controller;
 
-import org.springframework.web.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import java.util.*;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "https://ecom-clothshop-frontend.vercel.app/")
+@CrossOrigin(origins = {
+    "https://ecom-my-shop-frontend.vercel.app/",
+    "http://localhost:5173"
+})
 public class ProductController {
 
     private static final String FAKE_API = "https://fakestoreapi.com/products";

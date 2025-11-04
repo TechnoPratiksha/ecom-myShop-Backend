@@ -1,14 +1,26 @@
 package com.example.backend.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.backend.model.Order;
 import com.example.backend.service.OrderService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.util.*;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "https://ecom-clothshop-frontend.vercel.app/")
+@CrossOrigin(origins = {
+    "https://ecom-my-shop-frontend.vercel.app/",
+    "http://localhost:5173"
+})
 public class OrderController {
 
     private final OrderService orderService;
